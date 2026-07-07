@@ -19,7 +19,7 @@ describe("App", () => {
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/Home Page/)).toBeTruthy();
+    expect(screen.getByText("Submit a YouTube Video")).toBeTruthy();
   });
 
   it("renders JobDetailPage on /jobs/:id", () => {
