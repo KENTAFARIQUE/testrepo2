@@ -1,7 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import App from "../App";
+
+vi.mock("../api/client", () => ({
+  listVideos: vi.fn().mockResolvedValue([]),
+  getVideo: vi.fn().mockImplementation(() => new Promise(() => {})),
+}));
 
 describe("App", () => {
   it("renders without crashing", () => {
@@ -28,6 +33,6 @@ describe("App", () => {
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/Job Detail Page/)).toBeTruthy();
+    expect(screen.getByText("Loading job...")).toBeTruthy();
   });
 });
