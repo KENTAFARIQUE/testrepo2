@@ -1,0 +1,54 @@
+name: Agent Guard
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guardrails:
+    name: Issue-driven guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require linked issue in PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "$PR_BODY" | grep -Eiq '(Closes|Fixes|Resolves) #[0-9]+' || {
+            echo 'PR body must link an issue using: Closes #123, Fixes #123, or Resolves #123'
+            exit 1
+          }
+      - name: Require test evidence in PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "$PR_BODY" | grep -Eiq 'Tests run|Tested|make test|pytest|vitest|npm test' || {
+            echo 'PR body must include test evidence.'
+            exit 1
+          }
+      - name: Block direct storage artifacts
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -E '^storage/.+[^.]gitkeep$'; then
+            echo 'Do not commit generated media artifacts from storage/.'
+            exit 1
+          fi
+      - name: Warn on broad cross-layer changes
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          LAYERS=0
+          echo "$CHANGED" | grep -q '^apps/backend/' && LAYERS=$((LAYERS+1)) || true
+          echo "$CHANGED" | grep -q '^apps/frontend/' && LAYERS=$((LAYERS+1)) || true
+          echo "$CHANGED" | grep -q '^workers/' && LAYERS=$((LAYERS+1)) || true
+          echo "$CHANGED" | grep -q '^packages/contracts/' && LAYERS=$((LAYERS+1)) || true
+          echo "$CHANGED" | grep -q '^infra\|^docker-compose.yml\|^.github/' && LAYERS=$((LAYERS+1)) || true
+          if [ "$LAYERS" -gt 3 ]; then
+            echo 'This PR touches more than 3 layers. Confirm this is intentional and issue-scoped.'
+          fi

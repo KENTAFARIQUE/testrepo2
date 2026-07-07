@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - name: Python contract tests
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f packages/contracts/requirements.txt ]; then pip install -r packages/contracts/requirements.txt; fi
+          if find packages/contracts -name 'test_*.py' | grep -q .; then pytest packages/contracts; else echo 'No Python contract tests yet'; fi
+      - name: TypeScript contract tests
+        run: |
+          if [ -f apps/frontend/package.json ]; then
+            cd apps/frontend
+            npm ci || npm install
+            npm run test:contracts --if-present
+          else
+            echo 'Frontend package not bootstrapped yet'
+          fi
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f apps/backend/pyproject.toml ]; then pip install -e 'apps/backend[dev]'; fi
+          if [ -f apps/backend/requirements.txt ]; then pip install -r apps/backend/requirements.txt; fi
+      - name: Backend tests
+        run: |
+          if find apps/backend -name 'test_*.py' | grep -q .; then pytest apps/backend; else echo 'No backend tests yet'; fi
+
+  workers:
+    name: Workers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install worker dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          find workers -name requirements.txt -maxdepth 2 -print -exec pip install -r {} \;
+      - name: Worker tests
+        run: |
+          if find workers -name 'test_*.py' | grep -q .; then pytest workers; else echo 'No worker tests yet'; fi
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: |
+          if [ -f apps/frontend/package.json ]; then cd apps/frontend && npm ci || npm install; else echo 'Frontend package not bootstrapped yet'; fi
+      - name: Frontend tests
+        run: |
+          if [ -f apps/frontend/package.json ]; then cd apps/frontend && npm test -- --run; else echo 'Frontend package not bootstrapped yet'; fi
+      - name: Frontend build
+        run: |
+          if [ -f apps/frontend/package.json ]; then cd apps/frontend && npm run build --if-present; else echo 'Frontend package not bootstrapped yet'; fi
+
+  docker-smoke:
+    name: Docker Compose Smoke
+    runs-on: ubuntu-latest
+    needs: [contracts, backend, workers, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose config
+        run: docker compose config

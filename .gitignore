@@ -1,0 +1,16 @@
+.env
+.venv/
+node_modules/
+dist/
+build/
+__pycache__/
+.pytest_cache/
+.coverage
+storage/videos/*
+storage/audio/*
+storage/thumbnails/*
+storage/transcripts/*
+!storage/videos/.gitkeep
+!storage/audio/.gitkeep
+!storage/thumbnails/.gitkeep
+!storage/transcripts/.gitkeep

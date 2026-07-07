@@ -1,0 +1,40 @@
+- name: agent:backend
+  color: '1d76db'
+  description: Backend FastAPI, SQLAlchemy, API, queue publisher
+- name: agent:frontend
+  color: '5319e7'
+  description: React, Vite, TypeScript, Tailwind UI
+- name: agent:worker
+  color: 'fbca04'
+  description: RabbitMQ workers and processing handlers
+- name: agent:contracts
+  color: '0e8a16'
+  description: Pydantic/Zod contracts and compatibility tests
+- name: agent:infra
+  color: 'c5def5'
+  description: Docker, RabbitMQ, GitHub Actions, GitHub CLI
+- name: agent:test
+  color: 'd93f0b'
+  description: Test coverage, CI failures, quality gates
+- name: scope:backend
+  color: 'bfdadc'
+- name: scope:frontend
+  color: 'bfdadc'
+- name: scope:workers
+  color: 'bfdadc'
+- name: scope:contracts
+  color: 'bfdadc'
+- name: scope:infra
+  color: 'bfdadc'
+- name: type:feature
+  color: 'a2eeef'
+- name: type:test
+  color: 'fef2c0'
+- name: type:bug
+  color: 'd73a4a'
+- name: type:docs
+  color: '0075ca'
+- name: blocked
+  color: '000000'
+- name: ready-for-agent
+  color: '2ea44f'

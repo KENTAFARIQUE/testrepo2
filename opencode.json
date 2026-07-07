@@ -1,0 +1,70 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build",
+  "instructions": [
+    "AGENTS.md",
+    "docs/architecture.md",
+    "docs/testing/strategy.md",
+    "docs/issues/issue-driven-rules.md",
+    "docs/github/github-cli.md",
+    "docs/github/actions.md"
+  ],
+  "share": "manual",
+  "permission": {
+    "edit": "ask",
+    "bash": "ask",
+    "webfetch": "ask",
+    "websearch": "ask"
+  },
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      ".venv/**",
+      "dist/**",
+      "build/**",
+      "storage/**",
+      ".git/**",
+      "__pycache__/**",
+      ".pytest_cache/**"
+    ]
+  },
+  "formatter": true,
+  "lsp": true,
+  "command": {
+    "issue-plan": {
+      "description": "Create an implementation plan for a single issue without editing files",
+      "agent": "issue-planner",
+      "template": "Read the issue text below and create a scoped implementation plan. Include affected files, contracts, tests, risks, and a step-by-step checklist. Do not edit files.\n\nIssue:\n$ARGUMENTS"
+    },
+    "issue-build": {
+      "description": "Implement a single issue with tests",
+      "agent": "build",
+      "template": "Implement this issue only. Follow AGENTS.md. Add or update tests. Run focused tests and report results.\n\nIssue:\n$ARGUMENTS"
+    },
+    "review": {
+      "description": "Review current changes against project rules and test requirements",
+      "agent": "reviewer",
+      "template": "Review the current diff for correctness, test coverage, contract compatibility, security, and issue scope. Do not edit files."
+    },
+    "test": {
+      "description": "Run full test verification and summarize failures",
+      "agent": "test-engineer",
+      "template": "Run the relevant test suite. If tests fail, identify root causes and propose minimal fixes. Do not broaden scope."
+    },
+    "gh-issue": {
+      "description": "Create a GitHub issue plan and gh issue create command",
+      "agent": "github-agent",
+      "template": "Create a GitHub issue plan for this task. Propose title, labels, scope, acceptance criteria, required tests, and the exact `gh issue create` command. Do not edit product code.\n\nTask:\n$ARGUMENTS"
+    },
+    "gh-pr": {
+      "description": "Prepare a PR body and preflight checklist for the current branch",
+      "agent": "github-agent",
+      "template": "Prepare this branch for a GitHub PR. Check the diff against AGENTS.md, verify issue scope, summarize tests run, and produce a PR body that satisfies `.github/pull_request_template.md`.\n\nContext:\n$ARGUMENTS"
+    },
+    "ci-fix": {
+      "description": "Analyze CI failures and propose/implement minimal fixes",
+      "agent": "test-engineer",
+      "template": "Analyze CI failures for the current branch. Use the smallest possible change to fix the failing check. Do not broaden the issue scope. Re-run the focused test command and summarize the result.\n\nFailure context:\n$ARGUMENTS"
+    }
+  }
+}

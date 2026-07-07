@@ -1,0 +1,34 @@
+name: CI / infra issue
+about: GitHub Actions, GitHub CLI, Docker, repository automation, or agent control task
+labels:
+  - "type:test"
+  - "scope:infra"
+  - "agent:infra"
+  - "ready-for-agent"
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+    validations:
+      required: true
+  - type: textarea
+    id: affected_workflows
+    attributes:
+      label: Affected workflows / commands
+      description: List GitHub Actions workflows, Makefile targets, gh commands, or opencode commands.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required validation
+      description: "Example: docker compose config, make ci-local, gh pr checks --watch."
+    validations:
+      required: true

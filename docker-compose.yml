@@ -1,0 +1,80 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./apps/backend
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+
+  frontend:
+    build: ./apps/frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  ytd-worker:
+    build: ./workers/ytd
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+
+  ffmpeg-worker:
+    build: ./workers/ffmpeg
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+
+  transcribe-worker:
+    build: ./workers/transcribe
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+
+  summary-worker:
+    build: ./workers/summary
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data
+
+  tags-worker:
+    build: ./workers/tags
+    env_file: .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+      - ./data:/app/data

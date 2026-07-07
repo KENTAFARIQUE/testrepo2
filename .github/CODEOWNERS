@@ -1,0 +1,14 @@
+# Ownership map for issue-driven multi-agent review.
+# Replace usernames/teams after repository creation.
+
+/AGENTS.md                      @repo-owner
+/opencode.json                  @repo-owner
+/.opencode/                     @repo-owner
+/.github/                       @repo-owner
+/docker-compose.yml             @repo-owner
+
+/apps/backend/                  @backend-agent
+/apps/frontend/                 @frontend-agent
+/workers/                       @worker-agent
+/packages/contracts/            @contracts-agent
+/docs/testing/                  @test-engineer

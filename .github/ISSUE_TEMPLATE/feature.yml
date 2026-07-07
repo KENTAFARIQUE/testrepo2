@@ -1,0 +1,73 @@
+name: Feature issue
+about: Issue-driven implementation task
+labels:
+  - "type:feature"
+  - "ready-for-agent"
+body:
+  - type: dropdown
+    id: owner_agent
+    attributes:
+      label: Owner agent
+      options:
+        - backend-agent
+        - frontend-agent
+        - worker-agent
+        - contracts-agent
+        - infra-agent
+        - test-engineer
+        - github-agent
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be true when this issue is done?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Exact files/layers/components included.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: What must not be changed in this issue?
+    validations:
+      required: true
+  - type: textarea
+    id: contracts
+    attributes:
+      label: Contracts changed
+      description: API, queue, DB, or schema changes.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Bullet list of observable behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests
+      description: Every issue must include tests.
+    validations:
+      required: true
+  - type: checkboxes
+    id: ci_expectations
+    attributes:
+      label: CI expectations
+      options:
+        - label: PR must link this issue.
+          required: true
+        - label: PR must include test evidence.
+          required: true
+        - label: CI must pass before merge.
+          required: true
