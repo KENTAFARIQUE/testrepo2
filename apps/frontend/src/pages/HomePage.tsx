@@ -1,7 +1,12 @@
+import SubmitForm from "../components/SubmitForm";
+
 export default function HomePage() {
   return (
     <div>
-      <p className="text-gray-500">Home Page — submit form will go here</p>
+      <h2 className="mb-6 text-xl font-semibold text-gray-800">
+        Submit a YouTube Video
+      </h2>
+      <SubmitForm />
     </div>
   );
 }
