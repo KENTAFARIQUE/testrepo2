@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     use_fake_media: bool = True
     use_fake_models: bool = True
     max_video_duration_seconds: int = 180
+    cors_origins: str = "http://localhost:5173"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
