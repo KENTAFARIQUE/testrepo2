@@ -5,6 +5,7 @@ dist/
 build/
 __pycache__/
 .pytest_cache/
+*.egg-info/
 .coverage
 storage/videos/*
 storage/audio/*
