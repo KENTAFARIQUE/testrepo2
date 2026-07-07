@@ -1,4 +1,5 @@
 import SubmitForm from "../components/SubmitForm";
+import JobList from "../components/JobList";
 
 export default function HomePage() {
   return (
@@ -7,6 +8,10 @@ export default function HomePage() {
         Submit a YouTube Video
       </h2>
       <SubmitForm />
+      <div className="mt-10">
+        <h3 className="mb-4 text-lg font-semibold text-gray-800">Jobs</h3>
+        <JobList />
+      </div>
     </div>
   );
 }
