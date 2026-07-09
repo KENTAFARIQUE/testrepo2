@@ -30,7 +30,13 @@ class RealYoutubeDownloader:
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "Accept-Language": "en-us,en;q=0.5",
             },
-            "extractor_args": {"youtube": {"skip": ["dash", "hls"]}},
+            "js_runtimes": ["node"],
+            "extractor_args": {
+                "youtube": {
+                    "skip": ["dash", "hls"],
+                    "player_client": ["android"],
+                },
+            },
             "extractor_retries": 3,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:  # type: ignore[arg-type]
