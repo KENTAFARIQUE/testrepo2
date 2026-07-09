@@ -22,7 +22,7 @@ class RealYoutubeDownloader:
         os.makedirs(work_dir, exist_ok=True)
         ydl_opts = {
             "outtmpl": os.path.join(work_dir, "%(id)s.%(ext)s"),
-            "format": "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+            "format": "bestvideo+bestaudio/best",
             "quiet": True,
             "force_ipv4": True,
             "http_headers": {
@@ -33,11 +33,13 @@ class RealYoutubeDownloader:
             "js_runtimes": {"node": {}},
             "extractor_args": {
                 "youtube": {
-                    "skip": ["dash", "hls"],
-                    "player_client": ["android"],
+                    "skip": ["dash", "hls", "sabr"],
+                    "player_client": ["web"],
                 },
             },
-            "extractor_retries": 3,
+            "extractor_retries": 5,
+            "fragment_retries": 5,
+            "retry_sleep": [3, 6, 10],
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:  # type: ignore[arg-type]
             info = ydl.extract_info(url, download=True)
