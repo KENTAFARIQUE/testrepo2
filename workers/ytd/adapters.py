@@ -22,7 +22,7 @@ class RealYoutubeDownloader:
         os.makedirs(work_dir, exist_ok=True)
         ydl_opts = {
             "outtmpl": os.path.join(work_dir, "%(id)s.%(ext)s"),
-            "format": "bestvideo+bestaudio/best",
+            "format": "bestvideo*+bestaudio*/best",
             "quiet": True,
             "force_ipv4": True,
             "http_headers": {
@@ -33,8 +33,7 @@ class RealYoutubeDownloader:
             "js_runtimes": {"node": {}},
             "extractor_args": {
                 "youtube": {
-                    "skip": ["dash", "hls", "sabr"],
-                    "player_client": ["web"],
+                    "skip": ["hls", "sabr"],
                 },
             },
             "extractor_retries": 5,
