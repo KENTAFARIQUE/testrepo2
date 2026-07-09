@@ -4,7 +4,7 @@ import { listVideos } from "../api/client";
 import type { VideoJobResponse } from "../contracts";
 import StatusBadge from "./StatusBadge";
 
-export default function JobList() {
+export default function JobList({ refreshKey = 0 }: { refreshKey?: number }) {
   const [jobs, setJobs] = useState<VideoJobResponse[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export default function JobList() {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [refreshKey]);
 
   if (loading) {
     return (

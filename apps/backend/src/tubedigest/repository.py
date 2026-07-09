@@ -8,6 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tubedigest.models import VideoJob
 
 
+async def delete_all_jobs(db: AsyncSession) -> int:
+    result = await db.execute(select(VideoJob))
+    jobs = list(result.scalars().all())
+    for job in jobs:
+        await db.delete(job)
+    await db.commit()
+    return len(jobs)
+
+
 def _utcnow():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 

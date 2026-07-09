@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import sqlite3
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
@@ -88,12 +89,14 @@ def _process_message(ch, method, body, deps: HandlerDeps) -> None:
     try:
         message = WorkerMessage.model_validate_json(body)
     except Exception:
+        logging.exception("tags: failed to parse message")
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         return
 
     try:
         handle_message(message, deps)
     except Exception:
+        logging.exception("tags: failed to handle message")
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         return
 

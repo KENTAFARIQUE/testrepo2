@@ -8,7 +8,6 @@ RUN pip install -e /app/packages/contracts
 COPY apps/backend /app/apps/backend
 RUN pip install -e /app/apps/backend
 
-WORKDIR /app/apps/backend
 EXPOSE 8000
 
 CMD ["uvicorn", "tubedigest.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -42,6 +42,10 @@ export async function listVideos(): Promise<VideoJobResponse[]> {
   return validate(data, VideoJobResponseSchema.array());
 }
 
+export async function clearVideos(): Promise<void> {
+  await request("/api/videos", { method: "DELETE" });
+}
+
 export async function getVideo(id: string): Promise<VideoJobResponse> {
   const data = await request(`/api/videos/${id}`);
   return validate(data, VideoJobResponseSchema);

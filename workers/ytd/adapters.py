@@ -17,29 +17,30 @@ class FakeDownloader:
 
 class RealYoutubeDownloader:
     def download(self, url: str, work_dir: str) -> str:
-        import yt_dlp
+        import subprocess
+        import logging
 
         os.makedirs(work_dir, exist_ok=True)
-        ydl_opts = {
-            "outtmpl": os.path.join(work_dir, "%(id)s.%(ext)s"),
-            "format": "bestvideo*+bestaudio*/best",
-            "quiet": True,
-            "force_ipv4": True,
-            "http_headers": {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Language": "en-us,en;q=0.5",
-            },
-            "js_runtimes": {"node": {}},
-            "extractor_args": {
-                "youtube": {
-                    "skip": ["hls", "sabr"],
-                },
-            },
-            "extractor_retries": 5,
-            "fragment_retries": 5,
-            "retry_sleep": [3, 6, 10],
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:  # type: ignore[arg-type]
-            info = ydl.extract_info(url, download=True)
-            return os.path.join(work_dir, f"{info['id']}.{info['ext']}")  # type: ignore[index]
+        tmpl = os.path.join(work_dir, "%(id)s.%(ext)s")
+        logging.info("ytdl subprocess: work_dir=%s tmpl=%s url=%s", work_dir, tmpl, url)
+        result = subprocess.run(
+            [
+                "yt-dlp",
+                "--format", "b",
+                "--output", tmpl,
+                "--print", "after_move:%(id)s.%(ext)s",
+                "--force-ipv4",
+                "--no-playlist",
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        logging.info("ytdl subprocess: rc=%d stdout=%r stderr=%r", result.returncode, result.stdout[:200], result.stderr[:200])
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or result.stdout.strip())
+        filename = result.stdout.strip().split("\n")[-1]
+        full_path = os.path.join(work_dir, filename)
+        logging.info("ytdl subprocess: success path=%s", full_path)
+        return full_path

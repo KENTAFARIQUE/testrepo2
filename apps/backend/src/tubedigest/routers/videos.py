@@ -15,7 +15,7 @@ from tubedigest.contracts import (
 from tubedigest.database import get_db
 from tubedigest.dependencies import get_publisher
 from tubedigest.publisher import MessagePublisher
-from tubedigest.repository import create_job, list_jobs, get_job
+from tubedigest.repository import create_job, list_jobs, get_job, delete_all_jobs
 from tubedigest.settings import settings
 from tubedigest.sse import sse_manager
 
@@ -115,6 +115,13 @@ async def download_video(
 
     filename: str = os.path.basename(path)
     return FileResponse(full_path, filename=filename)
+
+
+@router.delete("", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_videos(
+    db: AsyncSession = Depends(get_db),
+):
+    await delete_all_jobs(db)
 
 
 @router.get("/{job_id}/events")

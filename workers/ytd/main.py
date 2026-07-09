@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import sqlite3
 from datetime import datetime, timezone
 from typing import Dict, Any
@@ -70,12 +71,14 @@ def _process_message(ch, method, body, deps: HandlerDeps) -> None:
     try:
         message = WorkerMessage.model_validate_json(body)
     except Exception:
+        logging.exception("ytd: failed to parse message")
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         return
 
     try:
         handle_message(message, deps)
     except Exception:
+        logging.exception("ytd: failed to handle message")
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         return
 
@@ -83,6 +86,7 @@ def _process_message(ch, method, body, deps: HandlerDeps) -> None:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO)
     rabbitmq_url = os.environ.get("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
 
     connection = pika.BlockingConnection(pika.URLParameters(rabbitmq_url))

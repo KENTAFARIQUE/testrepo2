@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import dataclass
 from typing import Protocol, Dict, Any, Optional
 
@@ -67,6 +68,7 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
             {"job_id": message.job_id, "status": "completed", "current_step": "completed"},
         )
     except Exception as e:
+        logging.exception("tags handler: job %s failed", message.job_id)
         deps.db.update_job(
             message.job_id,
             {

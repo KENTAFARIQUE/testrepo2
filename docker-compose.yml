@@ -22,7 +22,7 @@ services:
       - "8000:8000"
     volumes:
       - ./storage:/app/storage
-      - ./data:/app/apps/backend/data
+      - ./data:/app/data
 
   frontend:
     build:

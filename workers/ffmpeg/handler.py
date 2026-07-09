@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Protocol, Dict, Any, Optional
 
@@ -68,6 +69,7 @@ def handle_audio_extract(message: WorkerMessage, deps: HandlerDeps) -> None:
             {"job_id": message.job_id, "video_id": message.video_id},
         )
     except Exception as e:
+        logging.exception("ffmpeg audio_extract: job %s failed", message.job_id)
         _fail(message, deps, str(e))
 
 
@@ -99,6 +101,7 @@ def handle_thumbnail_generate(message: WorkerMessage, deps: HandlerDeps) -> None
             },
         )
     except Exception as e:
+        logging.exception("ffmpeg thumbnail: job %s failed", message.job_id)
         _fail(message, deps, str(e))
 
 

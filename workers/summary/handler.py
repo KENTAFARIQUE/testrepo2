@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Protocol, Dict, Any, Optional
 
@@ -66,6 +67,7 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
             {"job_id": message.job_id, "video_id": message.video_id},
         )
     except Exception as e:
+        logging.exception("summary handler: job %s failed", message.job_id)
         deps.db.update_job(
             message.job_id,
             {
