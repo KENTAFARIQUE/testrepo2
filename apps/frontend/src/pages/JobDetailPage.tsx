@@ -4,7 +4,7 @@ import { getVideo } from "../api/client";
 import type { VideoJobResponse } from "../contracts";
 import StatusBadge from "../components/StatusBadge";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 const POLL_INTERVAL = 5000;
 
 const PIPELINE_STEPS = [

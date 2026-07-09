@@ -45,7 +45,7 @@ def _consumer_thread(loop: asyncio.AbstractEventLoop, sse: SSEManager, url: str)
         channel.basic_qos(prefetch_count=1)
 
         def callback(
-            ch: pika.Channel,
+            ch: pika.channel.Channel,
             method: pika.spec.Basic.Deliver,
             properties: pika.spec.BasicProperties,
             body: bytes,
