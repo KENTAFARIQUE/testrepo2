@@ -30,7 +30,7 @@ class RealYoutubeDownloader:
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "Accept-Language": "en-us,en;q=0.5",
             },
-            "js_runtimes": ["node"],
+            "js_runtimes": {"node": {}},
             "extractor_args": {
                 "youtube": {
                     "skip": ["dash", "hls"],
