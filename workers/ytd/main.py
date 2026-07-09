@@ -19,7 +19,7 @@ class SqliteJobStore:
         return sqlite3.connect(self._db_path)
 
     def update_job(self, job_id: str, updates: Dict[str, Any]) -> None:
-        updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+        updates["updated_at"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         columns = ", ".join(f"{k}=?" for k in updates)
         values = list(updates.values()) + [job_id]
         with self._conn() as conn:
@@ -43,8 +43,9 @@ class RabbitPublisher:
 
 def _resolve_db_path() -> str:
     url = os.environ.get("DATABASE_URL", "sqlite:///./data/tubedigest.db")
-    if url.startswith("sqlite:///"):
-        return url[len("sqlite:///"):]
+    for prefix in ("sqlite+aiosqlite:///", "sqlite:///"):
+        if url.startswith(prefix):
+            return url[len(prefix):]
     return url
 
 

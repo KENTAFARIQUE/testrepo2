@@ -1,6 +1,9 @@
+import asyncio
 import json
+import os
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tubedigest.contracts import (
@@ -13,6 +16,8 @@ from tubedigest.database import get_db
 from tubedigest.dependencies import get_publisher
 from tubedigest.publisher import MessagePublisher
 from tubedigest.repository import create_job, list_jobs, get_job
+from tubedigest.settings import settings
+from tubedigest.sse import sse_manager
 
 router = APIRouter(prefix="/videos", tags=["videos"])
 
@@ -77,3 +82,53 @@ async def get_video(
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
     return _model_to_response(job)
+
+
+@router.get("/{job_id}/download")
+async def download_video(
+    job_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    job = await get_job(db, job_id)
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
+    path = job.video_path
+    if not path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No video file available for this job",
+        )
+
+    relative = path
+    for prefix in ("storage/", "audio/", "thumbnails/", "transcripts/"):
+        if relative.startswith(prefix):
+            relative = relative[len(prefix):]
+            break
+    full_path: str = path if os.path.isabs(path) else os.path.join(settings.storage_root, relative)
+
+    if not os.path.exists(full_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Video file not found on disk",
+        )
+
+    filename: str = os.path.basename(path)
+    return FileResponse(full_path, filename=filename)
+
+
+@router.get("/{job_id}/events")
+async def job_events(job_id: str):
+    queue = await sse_manager.register(job_id)
+
+    async def event_stream():
+        try:
+            while True:
+                data = await queue.get()
+                yield f"data: {json.dumps(data)}\n\n"
+        except asyncio.CancelledError:
+            pass
+        finally:
+            await sse_manager.unregister(job_id, queue)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

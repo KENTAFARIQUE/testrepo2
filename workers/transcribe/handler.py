@@ -5,6 +5,7 @@ from tubedigest.contracts import WorkerMessage
 from tubedigest.contracts import (
     QUEUE_VIDEO_SUMMARIZE,
     QUEUE_VIDEO_FAILED,
+    QUEUE_VIDEO_STATUS,
     JobStatus,
 )
 from workers.transcribe.adapters import Transcriber
@@ -37,6 +38,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
             message.job_id,
             {"status": JobStatus.transcribing.value},
         )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "transcribing", "current_step": "transcribing"},
+        )
 
         audio_path = job.get("audio_path")
         if not audio_path:
@@ -51,6 +56,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "transcript": transcript,
             },
         )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "summarizing", "current_step": "summarizing"},
+        )
 
         deps.publisher.publish(
             QUEUE_VIDEO_SUMMARIZE,
@@ -63,6 +72,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "status": JobStatus.failed.value,
                 "error": str(e),
             },
+        )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "failed", "current_step": "queued"},
         )
         deps.publisher.publish(
             QUEUE_VIDEO_FAILED,

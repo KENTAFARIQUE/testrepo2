@@ -5,6 +5,7 @@ QUEUE_VIDEO_TRANSCRIBE = "video.transcribe"
 QUEUE_VIDEO_SUMMARIZE = "video.summarize"
 QUEUE_VIDEO_TAGS = "video.tags"
 QUEUE_VIDEO_FAILED = "video.failed"
+QUEUE_VIDEO_STATUS = "video.status"
 
 ALL_QUEUES = [
     QUEUE_VIDEO_DOWNLOAD,
@@ -14,4 +15,5 @@ ALL_QUEUES = [
     QUEUE_VIDEO_SUMMARIZE,
     QUEUE_VIDEO_TAGS,
     QUEUE_VIDEO_FAILED,
+    QUEUE_VIDEO_STATUS,
 ]

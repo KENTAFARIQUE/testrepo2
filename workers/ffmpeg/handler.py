@@ -5,6 +5,7 @@ from tubedigest.contracts import WorkerMessage
 from tubedigest.contracts import (
     QUEUE_VIDEO_TRANSCRIBE,
     QUEUE_VIDEO_FAILED,
+    QUEUE_VIDEO_STATUS,
     JobStatus,
 )
 from workers.ffmpeg.adapters import FfmpegAdapter
@@ -39,6 +40,10 @@ def handle_audio_extract(message: WorkerMessage, deps: HandlerDeps) -> None:
             message.job_id,
             {"status": JobStatus.extracting_audio.value},
         )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "extracting_audio", "current_step": "extracting_audio"},
+        )
 
         video_path = job.get("video_path")
         if not video_path:
@@ -52,6 +57,10 @@ def handle_audio_extract(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "status": JobStatus.transcribing.value,
                 "audio_path": audio_path,
             },
+        )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "transcribing", "current_step": "transcribing"},
         )
 
         deps.publisher.publish(
@@ -71,6 +80,10 @@ def handle_thumbnail_generate(message: WorkerMessage, deps: HandlerDeps) -> None
         deps.db.update_job(
             message.job_id,
             {"status": JobStatus.generating_thumbnail.value},
+        )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "generating_thumbnail", "current_step": "generating_thumbnail"},
         )
 
         video_path = job.get("video_path")
@@ -96,6 +109,10 @@ def _fail(message: WorkerMessage, deps: HandlerDeps, error: str) -> None:
             "status": JobStatus.failed.value,
             "error": error,
         },
+    )
+    deps.publisher.publish(
+        QUEUE_VIDEO_STATUS,
+        {"job_id": message.job_id, "status": "failed", "current_step": "queued"},
     )
     deps.publisher.publish(
         QUEUE_VIDEO_FAILED,

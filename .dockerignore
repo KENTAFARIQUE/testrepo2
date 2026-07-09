@@ -1,0 +1,16 @@
+.git
+.env
+node_modules
+__pycache__
+*.pyc
+.pytest_cache
+.venv
+dist
+build
+*.egg-info
+storage/videos
+storage/audio
+storage/thumbnails
+storage/transcripts
+worktrees.json
+*.md

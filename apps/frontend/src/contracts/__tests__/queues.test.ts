@@ -7,6 +7,7 @@ import {
   QUEUE_VIDEO_SUMMARIZE,
   QUEUE_VIDEO_TAGS,
   QUEUE_VIDEO_FAILED,
+  QUEUE_VIDEO_STATUS,
   ALL_QUEUES,
 } from "../queues";
 
@@ -19,10 +20,11 @@ describe("queue constants", () => {
     expect(QUEUE_VIDEO_SUMMARIZE).toBe("video.summarize");
     expect(QUEUE_VIDEO_TAGS).toBe("video.tags");
     expect(QUEUE_VIDEO_FAILED).toBe("video.failed");
+    expect(QUEUE_VIDEO_STATUS).toBe("video.status");
   });
 
-  it("ALL_QUEUES has 7 values", () => {
-    expect(ALL_QUEUES).toHaveLength(7);
+  it("ALL_QUEUES has 8 values", () => {
+    expect(ALL_QUEUES).toHaveLength(8);
   });
 
   it("ALL_QUEUES has no duplicates", () => {

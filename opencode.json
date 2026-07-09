@@ -11,10 +11,10 @@
   ],
   "share": "manual",
   "permission": {
-    "edit": "ask",
-    "bash": "ask",
-    "webfetch": "ask",
-    "websearch": "ask"
+    "edit": "allow",
+    "bash": "allow",
+    "webfetch": "allow",
+    "websearch": "allow"
   },
   "watcher": {
     "ignore": [

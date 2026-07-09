@@ -24,7 +24,7 @@ class TestPostVideos:
     async def test_valid_url_returns_201(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post("/videos", json={"url": "https://youtube.com/watch?v=test"})
+            resp = await client.post("/api/videos", json={"url": "https://youtube.com/watch?v=test"})
         assert resp.status_code == 201
         data = resp.json()
         assert data["url"] == "https://youtube.com/watch?v=test"
@@ -36,7 +36,7 @@ class TestPostVideos:
     async def test_publishes_video_download_message(self, fake_publisher):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            await client.post("/videos", json={"url": "https://youtube.com/watch?v=test"})
+            await client.post("/api/videos", json={"url": "https://youtube.com/watch?v=test"})
         assert len(fake_publisher.published_messages) == 1
         queue, msg = fake_publisher.published_messages[0]
         assert queue == "video.download"
@@ -46,13 +46,13 @@ class TestPostVideos:
     async def test_empty_url_returns_422(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post("/videos", json={"url": ""})
+            resp = await client.post("/api/videos", json={"url": ""})
         assert resp.status_code == 422
 
     async def test_db_has_job_after_post(self, db_session):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.post("/videos", json={"url": "https://youtube.com/watch?v=test"})
+            resp = await client.post("/api/videos", json={"url": "https://youtube.com/watch?v=test"})
         job_id = resp.json()["id"]
         from tubedigest.repository import get_job
         job = await get_job(db_session, job_id)
@@ -64,16 +64,16 @@ class TestGetVideos:
     async def test_empty_list(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            resp = await client.get("/videos")
+            resp = await client.get("/api/videos")
         assert resp.status_code == 200
         assert resp.json() == []
 
     async def test_returns_jobs_ordered_by_created_at_desc(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            r1 = await client.post("/videos", json={"url": "https://youtube.com/watch?v=1"})
-            r2 = await client.post("/videos", json={"url": "https://youtube.com/watch?v=2"})
-            resp = await client.get("/videos")
+            r1 = await client.post("/api/videos", json={"url": "https://youtube.com/watch?v=1"})
+            r2 = await client.post("/api/videos", json={"url": "https://youtube.com/watch?v=2"})
+            resp = await client.get("/api/videos")
         data = resp.json()
         assert len(data) == 2
         assert data[0]["id"] == r2.json()["id"]
@@ -82,9 +82,9 @@ class TestGetVideos:
     async def test_returns_job_by_id(self):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
-            created = await client.post("/videos", json={"url": "https://youtube.com/watch?v=test"})
+            created = await client.post("/api/videos", json={"url": "https://youtube.com/watch?v=test"})
             job_id = created.json()["id"]
-            resp = await client.get(f"/videos/{job_id}")
+            resp = await client.get(f"/api/videos/{job_id}")
         assert resp.status_code == 200
         assert resp.json()["id"] == job_id
         assert resp.json()["url"] == "https://youtube.com/watch?v=test"

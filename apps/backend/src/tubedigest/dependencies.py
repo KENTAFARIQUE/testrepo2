@@ -10,7 +10,7 @@ _publisher: Optional[MessagePublisher] = None
 def get_publisher() -> MessagePublisher:
     global _publisher
     if _publisher is None:
-        if settings.use_fake_models:
+        if settings.use_fake_publisher:
             _publisher = FakePublisher()
         else:
             _publisher = RabbitMQPublisher(url=settings.rabbitmq_url)

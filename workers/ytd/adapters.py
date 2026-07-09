@@ -24,6 +24,7 @@ class RealYoutubeDownloader:
             "outtmpl": os.path.join(work_dir, "%(id)s.%(ext)s"),
             "format": "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
             "quiet": True,
+            "force_ipv4": True,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:  # type: ignore[arg-type]
             info = ydl.extract_info(url, download=True)

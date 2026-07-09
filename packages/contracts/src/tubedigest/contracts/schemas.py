@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from typing import Optional
 
 
@@ -43,9 +43,19 @@ class VideoJobResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @field_serializer("created_at", "updated_at")
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat() + "Z"
+
 
 class WorkerMessage(BaseModel):
     job_id: str
     video_id: str
     attempt: int = 1
     url: Optional[str] = None
+
+
+class JobStatusUpdate(BaseModel):
+    job_id: str
+    status: str
+    current_step: str

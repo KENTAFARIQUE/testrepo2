@@ -6,6 +6,7 @@ from tubedigest.contracts import (
     QUEUE_VIDEO_AUDIO_EXTRACT,
     QUEUE_VIDEO_THUMBNAIL_GENERATE,
     QUEUE_VIDEO_FAILED,
+    QUEUE_VIDEO_STATUS,
     JobStatus,
 )
 from workers.ytd.adapters import Downloader
@@ -36,6 +37,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
             message.job_id,
             {"status": JobStatus.downloading.value},
         )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "downloading", "current_step": "downloading"},
+        )
 
         video_path = deps.downloader.download(message.url, deps.videos_dir)
 
@@ -45,6 +50,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "status": JobStatus.downloaded.value,
                 "video_path": video_path,
             },
+        )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "downloaded", "current_step": "downloaded"},
         )
 
         deps.publisher.publish(
@@ -62,6 +71,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "status": JobStatus.failed.value,
                 "error": str(e),
             },
+        )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "failed", "current_step": "queued"},
         )
         deps.publisher.publish(
             QUEUE_VIDEO_FAILED,

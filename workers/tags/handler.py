@@ -5,6 +5,7 @@ from typing import Protocol, Dict, Any, Optional
 from tubedigest.contracts import WorkerMessage
 from tubedigest.contracts import (
     QUEUE_VIDEO_FAILED,
+    QUEUE_VIDEO_STATUS,
     JobStatus,
 )
 from workers.tags.adapters import Tagger
@@ -37,6 +38,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
             message.job_id,
             {"status": JobStatus.generating_tags.value},
         )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "generating_tags", "current_step": "generating_tags"},
+        )
 
         transcript = job.get("transcript")
         summary = job.get("summary")
@@ -57,6 +62,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "chapters": json.dumps(chapters),
             },
         )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "completed", "current_step": "completed"},
+        )
     except Exception as e:
         deps.db.update_job(
             message.job_id,
@@ -64,6 +73,10 @@ def handle_message(message: WorkerMessage, deps: HandlerDeps) -> None:
                 "status": JobStatus.failed.value,
                 "error": str(e),
             },
+        )
+        deps.publisher.publish(
+            QUEUE_VIDEO_STATUS,
+            {"job_id": message.job_id, "status": "failed", "current_step": "queued"},
         )
         deps.publisher.publish(
             QUEUE_VIDEO_FAILED,

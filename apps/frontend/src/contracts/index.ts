@@ -4,6 +4,7 @@ export {
   CreateVideoRequestSchema,
   VideoJobResponseSchema,
   WorkerMessageSchema,
+  JobStatusUpdateSchema,
 } from "./schemas";
 
 export type {
@@ -12,6 +13,7 @@ export type {
   CreateVideoRequest,
   VideoJobResponse,
   WorkerMessage,
+  JobStatusUpdate,
 } from "./schemas";
 
 export {
@@ -22,5 +24,6 @@ export {
   QUEUE_VIDEO_SUMMARIZE,
   QUEUE_VIDEO_TAGS,
   QUEUE_VIDEO_FAILED,
+  QUEUE_VIDEO_STATUS,
   ALL_QUEUES,
 } from "./queues";

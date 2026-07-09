@@ -56,3 +56,11 @@ export const WorkerMessageSchema = z.object({
 });
 
 export type WorkerMessage = z.infer<typeof WorkerMessageSchema>;
+
+export const JobStatusUpdateSchema = z.object({
+  job_id: z.string(),
+  status: z.string(),
+  current_step: z.string(),
+});
+
+export type JobStatusUpdate = z.infer<typeof JobStatusUpdateSchema>;

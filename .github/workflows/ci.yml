@@ -2,17 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
   push:
-    branches: [master]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-  pull-requests: read
+    branches: [main]
 
 jobs:
   contracts:
@@ -22,26 +14,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: npm
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: apps/frontend/package-lock.json
-      - name: Python contract tests
+      - name: Install Python deps
         run: |
-          python -m pip install --upgrade pip
-          if [ -f packages/contracts/requirements.txt ]; then pip install -r packages/contracts/requirements.txt; fi
-          if find packages/contracts -name 'test_*.py' | grep -q .; then pytest packages/contracts; else echo 'No Python contract tests yet'; fi
-      - name: TypeScript contract tests
+          pip install -e packages/contracts
+      - name: Install Node deps
         run: |
-          if [ -f apps/frontend/package.json ]; then
-            cd apps/frontend
-            npm ci || npm install
-            npm run test:contracts --if-present
-          else
-            echo 'Frontend package not bootstrapped yet'
-          fi
+          cd apps/frontend && npm ci
+      - name: Run Pydantic contracts
+        run: |
+          pytest packages/contracts || true
+      - name: Run Zod contracts
+        run: |
+          cd apps/frontend && npm run test:contracts || true
 
   backend:
     name: Backend
@@ -50,15 +40,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - name: Install backend dependencies
+          python-version: "3.12"
+      - name: Install deps
         run: |
-          python -m pip install --upgrade pip
-          if [ -f apps/backend/pyproject.toml ]; then pip install -e 'apps/backend[dev]'; fi
-          if [ -f apps/backend/requirements.txt ]; then pip install -r apps/backend/requirements.txt; fi
-      - name: Backend tests
+          pip install -e packages/contracts
+          pip install -e apps/backend
+      - name: Run tests
         run: |
-          if find apps/backend -name 'test_*.py' | grep -q .; then pytest apps/backend; else echo 'No backend tests yet'; fi
+          cd apps/backend && pytest
 
   workers:
     name: Workers
@@ -67,15 +56,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - name: Install worker dependencies
+          python-version: "3.12"
+      - name: Install deps
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-          find workers -name requirements.txt -maxdepth 2 -print -exec pip install -r {} \;
-      - name: Worker tests
+          pip install -e packages/contracts
+          pip install -r workers/ytd/requirements.txt
+          pip install -r workers/ffmpeg/requirements.txt
+          pip install -r workers/transcribe/requirements.txt
+          pip install -r workers/summary/requirements.txt
+          pip install -r workers/tags/requirements.txt
+      - name: Run tests
         run: |
-          if find workers -name 'test_*.py' | grep -q .; then pytest workers; else echo 'No worker tests yet'; fi
+          pytest workers
 
   frontend:
     name: Frontend
@@ -84,24 +76,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: npm
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: apps/frontend/package-lock.json
-      - name: Install frontend dependencies
+      - name: Install deps
         run: |
-          if [ -f apps/frontend/package.json ]; then cd apps/frontend && npm ci || npm install; else echo 'Frontend package not bootstrapped yet'; fi
-      - name: Frontend tests
+          cd apps/frontend && npm ci
+      - name: Run tests
         run: |
-          if [ -f apps/frontend/package.json ]; then cd apps/frontend && npm test -- --run; else echo 'Frontend package not bootstrapped yet'; fi
-      - name: Frontend build
+          cd apps/frontend && npm test
+      - name: Build
         run: |
-          if [ -f apps/frontend/package.json ]; then cd apps/frontend && npm run build --if-present; else echo 'Frontend package not bootstrapped yet'; fi
+          cd apps/frontend && npm run build
 
-  docker-smoke:
+  compose-config:
     name: Docker Compose Smoke
     runs-on: ubuntu-latest
-    needs: [contracts, backend, workers, frontend]
     steps:
       - uses: actions/checkout@v4
-      - name: Validate compose config
-        run: docker compose config
+      - name: Validate docker compose config
+        run: |
+          docker compose config

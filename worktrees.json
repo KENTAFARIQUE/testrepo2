@@ -1,46 +1,22 @@
 {
   "worktrees": [
     {
-      "key": "contracts",
-      "path_suffix": "contracts",
-      "branch": "worktree/contracts",
-      "agent": "contracts-agent",
-      "issues": [1]
-    },
-    {
       "key": "backend",
       "path_suffix": "backend",
       "branch": "worktree/backend",
-      "agent": "backend-agent",
-      "issues": [2, 3, 4, 5, 6]
-    },
-    {
-      "key": "workers",
-      "path_suffix": "workers",
-      "branch": "worktree/workers",
-      "agent": "worker-agent",
-      "issues": [7, 8, 9, 10, 11]
+      "issues": ["02", "03", "04", "05", "06"]
     },
     {
       "key": "frontend",
       "path_suffix": "frontend",
       "branch": "worktree/frontend",
-      "agent": "frontend-agent",
-      "issues": [12, 13, 14, 15]
+      "issues": ["12", "13", "14", "15"]
     },
     {
-      "key": "qa",
-      "path_suffix": "qa",
-      "branch": "worktree/qa",
-      "agent": "test-engineer",
-      "issues": [16]
-    },
-    {
-      "key": "docs",
-      "path_suffix": "docs",
-      "branch": "worktree/docs",
-      "agent": "architect-agent",
-      "issues": [17, 18]
+      "key": "workers",
+      "path_suffix": "workers",
+      "branch": "worktree/workers",
+      "issues": ["07", "08", "09", "10", "11", "16"]
     }
   ]
 }

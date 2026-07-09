@@ -11,8 +11,10 @@ class Settings(BaseSettings):
     use_fake_download: bool = True
     use_fake_media: bool = True
     use_fake_models: bool = True
+    use_fake_publisher: bool = False
     max_video_duration_seconds: int = 180
     cors_origins: str = "http://localhost:5173"
+    storage_root: str = "/app/storage"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
